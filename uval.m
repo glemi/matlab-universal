@@ -1,6 +1,85 @@
 classdef uval
-    %UVAL Summary of this class goes here
-    %   Detailed explanation goes here
+    %UVAL 
+    %   Class for uncertain values and error propagation. 
+    %
+    %   usage: 
+    %           % Specify Delta
+    %           x = uval(1.5, 0.2);            % x = 1.5 +- 0.2
+    %           x = uval(1.5, [0.1, 0.2]);     % x = 1.5 -0.1 +0.2
+    %
+    %           % Specify Upper / Lower Bounds
+    %           y = uval(1.5, [1.35 1.64]);    % x = 1.5 -0.15 +0.14
+    %
+    %           % Explicitly specify the definition mode
+    %           x = uval(1.5, [0.1 0.2], 'delta');    % delta
+    %           y = uval(1.5, [1.2 1.7], 'interval'); % bounds
+    %           
+    %   The first argument is the nominal value, the second argument is the
+    %   uncertainty, either as delta values ('delta' mode) or lower and 
+    %   upper bounds ('interval' mode). 
+    %
+    %   If the second argument (the uncertainty argument) is a scalar, it 
+    %   is always used as a symmetric delta value. If it is a two-element 
+    %   vector, it is assumed to be delta values (minus / plus) if both 
+    %   are smaller than the nominal value. Otherwise, if one is smaller 
+    %   and the other larger than the nominal value, it is assumend to be
+    %   interval values, i.e. the lower and upper bounds. The uncertainty
+    %   mode can be explicitly set to 'auto', which has the same effect as
+    %   not supplying a third argument. 
+    %
+    %   Supported Operations (result is another uval): 
+    %           z = x + y;  % scalar and matrix addition
+    %           z = x - y;  % scalar and matrix substraction
+    %           
+    %           z = x*y     % scalar multiplication (no vectors or matrices!)
+    %           z = x/y     % scalar division (no vectors or matrices!)
+    %           
+    %           z = x.*y    % element-wise multiplication
+    %           z = x./y    % element-wise division
+    %
+    %           z = x.^d    % exponentiation with a double value
+    %
+    %           d = double(x) % convert to double (discards bounds) 
+    %           
+    %   On addition and substraction, the absolute errors (delta) are
+    %   added. On multiplication and division, uppwer and lower bounds are
+    %   multiplied and devided, respectively, to determine the result's
+    %   upper and lower bounds. 
+    %
+    %   Comparison Operators: <, <=, >, >=, ==, ~= 
+    %   Comparison operators are based on the nominal value only;
+    %   uncertainties are disregarded. For example, x < y is equivalent to
+    %   double(x) < double(y). 
+    %
+    %   Other supported operations: 
+    %       isnan(x); 
+    %       isinf(x);
+    %       sign(x);
+    %       mean(x);
+    %       median(x);
+    %       sort(x); 
+    %
+    %   Properties (may be modified): 
+    %           x.Value : the nominal value
+    %           x.Plus  : upper delta value
+    %           x.Minus : lower delta value
+    %           x.Delta : the larger of [x.Plus x.Minus]
+    %           x.Upper : the upper bound
+    %           x.Lower : the lower bound
+    %
+    %   Properties (read-only):
+    %           x.PlusMinus : [x.Minus x.Plus]
+    %           x.Interval  : [x.Lower x.Upper]
+    %           x.Relative  : x.Interval/x.Value;
+    %           x.Range     : x.Plus + x.Minus = x.Upper - x.Lower
+    %
+    %
+    %   Properites can be modified to change the uval: 
+    %           x = uval(3, [0.2 0.25]);
+    %           x.Value = 4;               % x = 4 -0.2 +0.25
+    %           x.Delta                    % 0.25 (the larger delta)
+    %           x.Delta = 0.25;            % x = +- 0.25 (now symmetric)
+    %
     
     properties
         Value    % nominal Value
@@ -128,7 +207,11 @@ classdef uval
             end
         end   
         function c = mtimes(a, b)
-            c = a.*b;
+            if isscalar(a) && isscalar(b)
+                c = a.*b;
+            else
+                error 'Matrix multiplication not (yet) supported; * (mtimes) operator works with scalars only';
+            end
         end
         function c = rdivide(a, b)
             c = uval.arrayop(@op,a,b);
@@ -144,7 +227,11 @@ classdef uval
             end
         end
         function c = mrdivide(a, b)
-            c = a./b;
+            if isscalar(a) && isscalar(b)
+                c = a./b;
+            else
+                error 'Matrix division not (yet) supported; / (mrdivide) operator works with scalars only';
+            end
         end
         function c = power(a, b)
             c = uval.arrayop(@op,a,b);
