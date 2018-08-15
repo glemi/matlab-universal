@@ -207,7 +207,7 @@ classdef uval
             end
         end   
         function c = mtimes(a, b)
-            if isscalar(a) && isscalar(b)
+            if isscalar(a) || isscalar(b)
                 c = a.*b;
             else
                 error 'Matrix multiplication not (yet) supported; * (mtimes) operator works with scalars only';
@@ -227,7 +227,7 @@ classdef uval
             end
         end
         function c = mrdivide(a, b)
-            if isscalar(a) && isscalar(b)
+            if isscalar(a) || isscalar(b)
                 c = a./b;
             else
                 error 'Matrix division not (yet) supported; / (mrdivide) operator works with scalars only';
