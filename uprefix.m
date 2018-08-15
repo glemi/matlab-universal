@@ -56,7 +56,7 @@ function strings = uprefix(data, unit, varargin)
         
         str = [digits ' ' prefix unit];
         if ismember('latex', options)
-            str = [digits '\,' prefix unit];
+            str = [digits '\,\rm ' prefix unit];
             str = strrep(str, micro, '\mu{}');
         else
             str = strrep(str, micro, '\mu{}');

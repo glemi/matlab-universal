@@ -6,6 +6,8 @@
 %       % add options for text object
 %       tx = label(pos, object, name, value, ...) 
 %
+%       label(pos, text, fontspec); 
+%
 % Arguments:
 %       pos     Position in normalized units
 %       object  Either a string or the handle of a line object, in which
@@ -13,7 +15,9 @@
 %       
 %       tx      returns the text object handle
 %
-%
+% See Also: 
+%       fontspeceval
+% 
 function tx = label(pos, object, varargin)
     
     tx = text;

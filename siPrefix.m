@@ -13,6 +13,10 @@
 %
 % strings is a cell array if data is a vector, otherwise it is a char
 % array.
+%
+% See also:
+%       uprefix
+%
 function strings = siPrefix(data, unit, format)
     if nargin < 3 || isempty(format) || length(format) == 0
         format = '%3.*f';
