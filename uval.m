@@ -118,8 +118,14 @@ classdef uval
             
             n = numel(value);
             this(n) = uval; % pre-allocate
-            for k = 1:n
-                this(k) = this(k).create(value(k), uncert, mode);
+            if iscolumn(value) && all(size(uncert) >= size(value))
+                for k = 1:n
+                    this(k) = this(k).create(value(k), uncert(k,:), mode);
+                end
+            else
+                for k = 1:n
+                    this(k) = this(k).create(value(k), uncert, mode);
+                end
             end
             this = reshape(this, size(value));
         end
@@ -207,7 +213,7 @@ classdef uval
             end
         end   
         function c = mtimes(a, b)
-            if isscalar(a) && isscalar(b)
+            if isscalar(a) || isscalar(b)
                 c = a.*b;
             else
                 error 'Matrix multiplication not (yet) supported; * (mtimes) operator works with scalars only';
@@ -227,7 +233,7 @@ classdef uval
             end
         end
         function c = mrdivide(a, b)
-            if isscalar(a) && isscalar(b)
+            if isscalar(a) || isscalar(b)
                 c = a./b;
             else
                 error 'Matrix division not (yet) supported; / (mrdivide) operator works with scalars only';
@@ -391,7 +397,8 @@ classdef uval
             elseif ~isscalar(a) && isscalar(b)
                 b = repmat(b, size(a));
             end
-            c = arrayfun(op,a,b);
+            c = arrayfun(op,a,b, 'UniformOutput', false);
+            c = reshape([c{:}], size(c));
         end
     end
 end
